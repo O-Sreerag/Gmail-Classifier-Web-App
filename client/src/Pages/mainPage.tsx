@@ -5,6 +5,29 @@ import ClassifyEmails from '../Components/EmailClassification';
 import EmailDetails from '../Components/EmailDetails';
 import axios from 'axios';
 
+interface Part {
+    partId: string;
+    mimeType: string;
+    filename: string;
+    headers: { name: string; value: string }[];
+    body: { size: number; data: string };
+}
+
+interface Email {
+    id: string;
+    threadId: string;
+    labelIds: string[];
+    snippet: string;
+    payload: {
+        partId: string;
+        mimeType: string;
+        filename: string;
+        headers: { name: string; value: string }[];
+        body: { size: number, data: string };
+        parts: Part[];
+    };
+}
+
 function MainPage() {
     const [apiKey, setApiKey] = useState<string | null>(null);
     const [emails, setEmails] = useState<any[]>([]);
@@ -31,9 +54,40 @@ function MainPage() {
                     console.error(`Error fetching full message ${message.id}:`, error);
                 }
             }
-            
-            setEmails(fullEmails);
-            console.log(emails)
+            // console.log(fullEmails)
+
+            function extractHeaderValue(headers: { name: string; value: string }[], headerName: string): string | null {
+                const header = headers.find((h) => h.name.toLowerCase() === headerName.toLowerCase());
+                return header ? header.value : null;
+            }
+
+            function extractDataFromEmails(emails: Email[]): { from: string; to: string; subject: string }[] {
+                const extractedData: { id: string, from: string; to: string; subject: string, content: any }[] = [];
+
+                emails.forEach((email) => {
+                    const id = email.id
+                    const from = extractHeaderValue(email.payload.headers, "From") || "N/A";
+                    const to = extractHeaderValue(email.payload.headers, "To") || "N/A";
+                    const subject = extractHeaderValue(email.payload.headers, "Subject") || "N/A";
+                    
+                    if (email.payload.parts) {
+                        email.payload.parts.forEach((part) => {
+                            if (part.body && part.body.data && part.mimeType == "text/html") {
+                                extractedData.push({ id, from, to, subject, content:  part.body.data});                                
+                            }
+                        });
+                    } else {
+                        extractedData.push({ id, from, to, subject, content:  email.payload.body.data}); 
+                    }
+                });
+
+                return extractedData;
+            }
+
+            const extractedData = extractDataFromEmails(fullEmails);
+            console.log(extractedData);
+
+            setEmails(extractedData);
         } catch (error) {
             console.error(error);
         }
@@ -42,7 +96,7 @@ function MainPage() {
     const classifyEmails = async () => {
         try {
             const response = await axios.post('http://localhost:5000/classify', {
-                emails,
+                emails: emails,
                 api_key: apiKey
             });
 
