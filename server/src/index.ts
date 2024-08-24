@@ -23,16 +23,17 @@ async function classifyEmails(emails: any[], google: any) {
             model: google('gemini-1.5-flash'),
             prompt,
         });
+        console.log(response)
 
         return {
             ...email,
-            category: response.text.trim().toLowerCase(),
+            category: response.text.trim().toLowerCase().split('\n')[0].replace('this email is ', '').trim()
         };
     }));
 }
 
 function generateClassificationPrompt(email: any) {
-    return "Classify this email into one of the following categories: spam, important, promotion, other based on email.content Email: " + JSON.stringify(email)
+    return "Classify this email into one of the following categories: spam, important, promotion, other based on email.content Email: "+ JSON.stringify(email)
 }
 
 app.post('/classify', async (req, res) => {

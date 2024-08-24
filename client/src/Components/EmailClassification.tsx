@@ -1,11 +1,26 @@
 import { useState } from 'react';
+import { Base64 } from 'js-base64'
 
-function ClassifyEmails({ onClassify }: { onClassify: () => Promise<string> }) {
-    const [classificationResult, setClassificationResult] = useState<string | null>(null);
+interface ClassifiedEmailsInterface {
+    id: string,
+    from: string;
+    to: string;
+    subject: string,
+    content: any
+    category: string
+}
+
+function ClassifyEmails({ onClassify }: { onClassify: () => Promise<ClassifiedEmailsInterface[]> }) {
+    const [classifiedEmails, setClassifiedEmails] = useState<ClassifiedEmailsInterface[] | null>(null);
 
     const handleClassify = async () => {
         const result = await onClassify();
-        setClassificationResult(result);
+        setClassifiedEmails(result);
+    };
+
+    const decodeBase64 = (encodedContent: string) => {
+        console.log(Base64.decode(encodedContent))
+        return Base64.decode(encodedContent);
     };
 
     return (
@@ -17,10 +32,19 @@ function ClassifyEmails({ onClassify }: { onClassify: () => Promise<string> }) {
             >
                 Classify Emails
             </button>
-            {classificationResult && (
+            {classifiedEmails && (
                 <div className="mt-4 p-4 border border-gray-300 rounded">
-                    <h2 className="text-lg font-bold">Classification Result</h2>
-                    <p>{classificationResult}</p>
+                    <h2 className="text-lg font-bold">Classification Results</h2>
+                    <ul>
+                        {classifiedEmails.map((email, index) => (
+                            <li key={index}>
+                                <p>
+                                    <strong>{email.subject}</strong> - {email.category}
+                                </p>
+                                <div dangerouslySetInnerHTML={{ __html: decodeBase64(email.content) }} />
+                            </li>
+                        ))}
+                    </ul>
                 </div>
             )}
         </div>
