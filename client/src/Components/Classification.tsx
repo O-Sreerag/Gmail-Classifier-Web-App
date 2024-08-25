@@ -70,6 +70,7 @@ const Classification: React.FC = () => {
                 await delay(2000); // manual delay to avoid exhaution of resources
             }
         } catch (error) {
+            setError('Error Fetching emails');
             console.error(error);
         } finally {
             setIsClassifying(false);
@@ -120,6 +121,7 @@ const Classification: React.FC = () => {
 
     const classifyEmails = async (emails: ClassifiedEmail[]) => {
         try {
+            setError(null)
             setIsClassifying(true);
             const response = await axios.post('https://gmail-classifier-web-app.onrender.com/api/classify', {
                 emails,
@@ -129,6 +131,7 @@ const Classification: React.FC = () => {
             console.log("Classified Emails:", response.data.classifiedEmails);
             updateClassifiedEmails(response.data.classifiedEmails);
         } catch (error) {
+            setError('Error classifying emails')
             console.error('Error classifying emails:', error);
         }
     };
