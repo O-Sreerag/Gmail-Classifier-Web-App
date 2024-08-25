@@ -1,6 +1,6 @@
 # Node.js
 node_modules/
-dist/
+# dist/
 .env
 .env.local
 .env.development.local
@@ -70,7 +70,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-dist
+# dist
 dist-ssr
 *.local
 
