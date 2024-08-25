@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Attachment, ClassifiedEmail } from '../Interface/interfaces';
-import { Base64 } from 'js-base64';
 import axios from 'axios';
 import { useOAuth } from '../Contexts/OAuthContext';
 
@@ -18,10 +17,6 @@ const getInitials = (name: string) => {
         : nameParts[0][0];
 };
 
-const decodeBase64 = (encodedContent: string): string => {
-    return Base64.decode(encodedContent);
-};
-
 const EmailList: React.FC<EmailListProps> = ({ emails, itemsPerPage, currentPage, paginate }) => {
     const [selectedEmail, setSelectedEmail] = useState<ClassifiedEmail | null>(null);
     const { token } = useOAuth()
@@ -37,30 +32,6 @@ const EmailList: React.FC<EmailListProps> = ({ emails, itemsPerPage, currentPage
     const handleBackToList = () => {
         setSelectedEmail(null);
     };
-
-    // const downloadAttachment = (attachment: { filename: string; mimeType: string; data: string, id: string }) => {
-    //     try {
-    //         const byteCharacters = atob(attachment.data);
-    //         const byteNumbers = new Array(byteCharacters.length);
-    //         for (let i = 0; i < byteCharacters.length; i++) {
-    //             byteNumbers[i] = byteCharacters.charCodeAt(i);
-    //         }
-    //         const byteArray = new Uint8Array(byteNumbers);
-
-    //         const blob = new Blob([byteArray], { type: attachment.mimeType });
-    //         const url = URL.createObjectURL(blob);
-
-    //         const link = document.createElement('a');
-    //         link.href = url;
-    //         link.download = attachment.filename;
-    //         document.body.appendChild(link);
-    //         link.click();
-    //         document.body.removeChild(link);
-    //         URL.revokeObjectURL(url);
-    //     } catch (error) {
-    //         console.error('Failed to download attachment:', error);
-    //     }
-    // };
 
     const decodeBase64 = (base64: string) => {
         let base64String = base64.replace(/-/g, '+').replace(/_/g, '/');

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import ApiKeyInput from './ApiKey';
 import { useOAuth } from '../Contexts/OAuthContext';
 import Classification from './Classification';
