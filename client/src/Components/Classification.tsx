@@ -121,7 +121,7 @@ const Classification: React.FC = () => {
     const classifyEmails = async (emails: ClassifiedEmail[]) => {
         try {
             setIsClassifying(true);
-            const response = await axios.post('http://localhost:5000/classify', {
+            const response = await axios.post('https://gmail-classifier-web-app.onrender.com/classify', {
                 emails,
                 api_key: apiKey
             });
