@@ -131,7 +131,7 @@ const Classification: React.FC = () => {
             console.log("Classified Emails:", response.data.classifiedEmails);
             updateClassifiedEmails(response.data.classifiedEmails);
         } catch (error: any) {
-            setLocalError(`Error classifying emails : ${error.message}`)
+            setLocalError(`Error classifying emails`)
             console.error('Error classifying emails:', error);
         }
     };
