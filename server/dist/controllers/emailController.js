@@ -1,4 +1,4 @@
-import { classifyEmails } from '../models/emailModel';
+import { classifyEmails } from '../models/emailModel.js';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 export async function classifyEmailsController(req, res) {
     try {
