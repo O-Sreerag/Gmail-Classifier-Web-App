@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { ClassifiedEmail } from '../Interface/interfaces';
+import { Attachment, ClassifiedEmail } from '../Interface/interfaces';
 import { Base64 } from 'js-base64';
+import axios from 'axios';
+import { useOAuth } from '../Contexts/OAuthContext';
 
 interface EmailListProps {
     emails: ClassifiedEmail[];
@@ -22,6 +24,7 @@ const decodeBase64 = (encodedContent: string): string => {
 
 const EmailList: React.FC<EmailListProps> = ({ emails, itemsPerPage, currentPage, paginate }) => {
     const [selectedEmail, setSelectedEmail] = useState<ClassifiedEmail | null>(null);
+    const { token } = useOAuth()
 
     const indexOfLastEmail = currentPage * itemsPerPage;
     const indexOfFirstEmail = indexOfLastEmail - itemsPerPage;
@@ -34,6 +37,82 @@ const EmailList: React.FC<EmailListProps> = ({ emails, itemsPerPage, currentPage
     const handleBackToList = () => {
         setSelectedEmail(null);
     };
+
+    // const downloadAttachment = (attachment: { filename: string; mimeType: string; data: string, id: string }) => {
+    //     try {
+    //         const byteCharacters = atob(attachment.data);
+    //         const byteNumbers = new Array(byteCharacters.length);
+    //         for (let i = 0; i < byteCharacters.length; i++) {
+    //             byteNumbers[i] = byteCharacters.charCodeAt(i);
+    //         }
+    //         const byteArray = new Uint8Array(byteNumbers);
+
+    //         const blob = new Blob([byteArray], { type: attachment.mimeType });
+    //         const url = URL.createObjectURL(blob);
+
+    //         const link = document.createElement('a');
+    //         link.href = url;
+    //         link.download = attachment.filename;
+    //         document.body.appendChild(link);
+    //         link.click();
+    //         document.body.removeChild(link);
+    //         URL.revokeObjectURL(url);
+    //     } catch (error) {
+    //         console.error('Failed to download attachment:', error);
+    //     }
+    // };
+
+    const decodeBase64 = (base64: string) => {
+        let base64String = base64.replace(/-/g, '+').replace(/_/g, '/');
+        const padding = base64String.length % 4;
+        if (padding > 0) {
+            base64String += '='.repeat(4 - padding);
+        }
+        return atob(base64String);
+    };
+
+    const downloadFile = (filename: any, mimeType: any, base64Data: any) => {
+        try {
+            // Decode Base64 string to binary data
+            const binaryString = decodeBase64(base64Data);
+            const byteNumbers = new Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                byteNumbers[i] = binaryString.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+
+            // Create a Blob object
+            const blob = new Blob([byteArray], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+
+            // Create a link element and trigger the download
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Clean up the URL object
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading file:', error);
+        }
+    };
+
+    const fetchAttachments = async (attachment: Attachment, messageId: string) => {
+        try {
+            const response = await axios.get(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${messageId}/attachments/${attachment.id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            console.log(response.data)
+            downloadFile(attachment.filename, attachment.mimeType, response.data?.data)
+        } catch (error) {
+            console.error('Error fetching attachment:', error);
+            throw error;
+        }
+    };
+
 
     if (selectedEmail) {
         return (
@@ -55,6 +134,23 @@ const EmailList: React.FC<EmailListProps> = ({ emails, itemsPerPage, currentPage
                             className="prose"
                         />
                     </div>
+                    {selectedEmail.attachments && selectedEmail.attachments.length > 0 && (
+                        <div className="mt-4">
+                            <h5 className="text-lg font-semibold">Attachments:</h5>
+                            <ul className="list-disc ml-4">
+                                {selectedEmail.attachments.map((attachment) => (
+                                    <li key={attachment.filename} className="mt-2">
+                                        <button
+                                            onClick={() => fetchAttachments(attachment, selectedEmail.id)}
+                                            className="text-blue-600 hover:underline"
+                                        >
+                                            {attachment.filename}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
                 </div>
             </div>
         );

@@ -10,6 +10,7 @@ import LoginPage from './Pages/loginPage';
 import MainPage from './Pages/mainPage';
 import ErrorPage from './Pages/ErrorPage';
 import { ProtectedRoute, PublicRoute } from './Utils/Routes';
+// import FileDownloader from './Components/FileDownloader';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
                   <Route path="/" element={<Navigate to="/login" />} />
                   <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
                   <Route path='/home' element={<ProtectedRoute>< MainPage/></ProtectedRoute>} />
+                  {/* <Route path='/test' element={< FileDownloader/>} /> */}
                   <Route path='*' element={<ErrorPage />} />
                 </Routes>
               </BrowserRouter>

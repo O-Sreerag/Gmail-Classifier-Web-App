@@ -13,7 +13,7 @@ export interface Part {
     mimeType: string;
     filename: string;
     headers: { name: string; value: string }[];
-    body: { size: number; data: string };
+    body: { size: number; data: string, attachmentId: string };
 }
 
 export interface Email {
@@ -31,6 +31,13 @@ export interface Email {
     };
 }
 
+export interface Attachment {
+    filename: string;
+    mimeType: string;
+    id: string; // Base64 encoded data
+    data?: string; // Base64 encoded data
+}
+
 export interface ClassifiedEmail {
     id: string;
     from: string;
@@ -38,4 +45,5 @@ export interface ClassifiedEmail {
     subject: string;
     content: any;
     category?: string;
+    attachments?: Attachment[];
 }

@@ -55,7 +55,7 @@ app.post('/classify', async (req, res) => {
         const emails = req.body.emails;
         const API_KEY = req.body.api_key;
         // console.log("API_KEY ", API_KEY)
-        console.log("emails ", emails)
+        // console.log("emails ", emails)
 
         const google = createGoogleGenerativeAI({apiKey: API_KEY});
 

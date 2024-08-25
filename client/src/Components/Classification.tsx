@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { ClassifiedEmail, Email } from '../Interface/interfaces';
+import { Attachment, ClassifiedEmail, Email } from '../Interface/interfaces';
 import { useClassifiedEmails } from '../Contexts/ClassifiedEmailContext';
 import { useApiKey } from '../Contexts/ApiKeyContext';
 import EmailList from './EmailList';
@@ -93,15 +93,25 @@ const Classification: React.FC = () => {
             const from = extractHeaderValue(email.payload.headers, "From") || "N/A";
             const to = extractHeaderValue(email.payload.headers, "To") || "N/A";
             const subject = extractHeaderValue(email.payload.headers, "Subject") || "N/A";
+            const attachments: Attachment[] = [];
+            let content = ""
 
             if (email.payload.parts) {
                 email.payload.parts.forEach((part) => {
                     if (part.body && part.body.data && part.mimeType === "text/html") {
-                        extractedData.push({ id, from, to, subject, content: part.body.data });
+                        content = part.body.data
+                    } else if (part.body && part.body.attachmentId) {
+                        const attachment: Attachment = {
+                            filename: part.filename,
+                            mimeType: part.mimeType,
+                            id: part.body.attachmentId // Base64 encoded attachment data
+                        };
+                        attachments.push(attachment);
                     }
                 });
-            } else {
-                extractedData.push({ id, from, to, subject, content: email.payload.body.data });
+                extractedData.push({ id, from, to, subject, content: content, attachments: attachments });
+            } else if (email.payload.body.data) {
+                extractedData.push({ id, from, to, subject, content: email.payload.body.data, attachments: [] });
             }
         });
 
@@ -180,7 +190,7 @@ const Classification: React.FC = () => {
                         <div className={`flex gap-1 text-xs items-center }`}>
                             <AiFillDashboard className='text-orange-400' />
                             {
-                                emailCount && emailCount>5 ? (
+                                emailCount && emailCount > 5 ? (
                                     <p className='text-orange-400'>please wait, fetching is done in batches</p>
                                 ) : (
                                     <p className='text-orange-400'>please wait few secs</p>
