@@ -27,7 +27,21 @@ async function classifyEmails(emails: any[], google: any) {
 
         return {
             ...email,
-            category: response.text.trim().toLowerCase().split('\n')[0].replace('this email is ', '').trim()
+            category: (() => {
+                const category = response.text.trim().toLowerCase().split('\n')[0].replace('this email is ', '').trim();
+                
+                if (category.includes('promotion')) {
+                    return 'promotion';
+                } else if (category.includes('spam')) {
+                    return 'spam';
+                } else if (category.includes('important')) {
+                    return 'important';
+                } else if (category.includes('other')) {
+                    return 'other';
+                }
+        
+                return category;
+            })()
         };
     }));
 }
