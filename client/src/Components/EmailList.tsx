@@ -80,7 +80,7 @@ const EmailList: React.FC<EmailListProps> = ({ emails, itemsPerPage, currentPage
             downloadFile(attachment.filename, attachment.mimeType, response.data?.data)
         } catch (error) {
             console.error('Error fetching attachment:', error);
-            throw error;
+            // throw error;
         }
     };
 
